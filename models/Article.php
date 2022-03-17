@@ -1,99 +1,183 @@
 <?php
 
+
+
+
 namespace app\models;
+
+
+
 
 use Yii;
 
+
+
+
 /**
+
  * This is the model class for table "article".
+
  *
- * @property int $id
- * @property string|null $title
- * @property string|null $description
- * @property string|null $content
- * @property string|null $date
- * @property string|null $image
- * @property int|null $viewed
- * @property int|null $user_id
- * @property int|null $status
- * @property int|null $category_id
+
+ * @property integer $id
+
+ * @property string $title
+
+ * @property string $description
+
+ * @property string $content
+
+ * @property string $date
+
+ * @property string $image
+
+ * @property integer $viewed
+
+ * @property integer $user_id
+
+ * @property integer $status
+
+ * @property integer $category_id
+
  *
+
  * @property ArticleTag[] $articleTags
+
  * @property Comment[] $comments
+
  */
+
 class Article extends \yii\db\ActiveRecord
+
 {
+
     /**
-     * {@inheritdoc}
+
+     * @inheritdoc
+
      */
+
     public static function tableName()
+
     {
+
         return 'article';
+
     }
 
+
+
+
     /**
-     * {@inheritdoc}
+
+     * @inheritdoc
+
      */
+
     public function rules()
+
     {
+
         return [
-            // [['description', 'content'], 'string'],
-            // [['date'], 'safe'],
-            // [['viewed', 'user_id', 'status', 'category_id'], 'integer'],
-            // [['title', 'image'], 'string', 'max' => 255],
+
             [['title'], 'required'],
-            [['title', 'description', 'content'], 'string'],
+
+            [['title','description','content'], 'string'],
+
             [['date'], 'date', 'format'=>'php:Y-m-d'],
+
             [['date'], 'default', 'value' => date('Y-m-d')],
-            [['title'], 'string', 'max' => 255],
+
+            [['title'], 'string', 'max' => 255]
+
         ];
+
     }
 
+
+
+
     /**
-     * {@inheritdoc}
+
+     * @inheritdoc
+
      */
+
     public function attributeLabels()
+
     {
+
         return [
+
             'id' => 'ID',
+
             'title' => 'Title',
+
             'description' => 'Description',
+
             'content' => 'Content',
+
             'date' => 'Date',
+
             'image' => 'Image',
+
             'viewed' => 'Viewed',
+
             'user_id' => 'User ID',
+
             'status' => 'Status',
+
             'category_id' => 'Category ID',
+
         ];
+
     }
+
+
+
 
     public function saveImage($filename)
+
     {
+
         $this->image = $filename;
-        $this->save(false);//
+
+        return $this->save(false);
+
     }
 
 
-//     /**
-//      * Gets query for [[ArticleTags]].
-//      *
-//      * @return \yii\db\ActiveQuery
-//      */
-//     public function getArticleTags()
-//     {
-//         return $this->hasMany(ArticleTag::className(), ['article_id' => 'id']);
-//     }
+    public function getImage()
+    {
+        if($this->image)
+        {
+            return '@web/uploads/' . $this->image;
+        }
+        return '@web/no-image.jpg';
 
-//     /**
-//      * Gets query for [[Comments]].
-//      *
-//      * @return \yii\db\ActiveQuery
-//      */
-//     public function getComments()
-//     {
-//         return $this->hasMany(Comment::className(), ['article_id' => 'id']);
-//     }
+    //     return ($this->image) ? '@webroot/' . 'uploads/' . $this->image : '/no-image.png';
+    }
 
+
+    public function deleteImage()
+
+    {
+
+        $imageUploadModel = new ImageUpload();
+
+        $imageUploadModel->deleteCurrentImage($this->image);
+
+    }
+
+
+    public function beforeDelete() //автоматически запускется перед удалением
+
+    {
+
+        $this->deleteImage();
+
+        return parent::beforeDelete(); 
+
+    }
 
 }
